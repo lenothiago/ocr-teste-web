@@ -26,11 +26,15 @@ def processar_pdf_para_docx(pdf_file):
             if i > 0: doc.add_page_break()
             doc.add_heading(f'Página {i+1}', level=1)
 
-            # OCR
+            # OCR (Mantém o config, mas processamos o resultado diferente)
             texto = pytesseract.image_to_string(image, lang='por+eng')
             
             if texto.strip():
-                doc.add_paragraph(texto)
+                # NOVA LÓGICA: Divide o texto por linhas e cria parágrafos separados
+                for linha in texto.split('\n'):
+                    # Só adiciona se a linha não for vazia
+                    if linha.strip():
+                        doc.add_paragraph(linha)
             else:
                 doc.add_paragraph("[Sem texto detectado]")
             
@@ -56,4 +60,5 @@ if uploaded_file and st.button("Processar Arquivo"):
     resultado = processar_pdf_para_docx(uploaded_file)
     if resultado:
         st.success("Pronto!")
+
         st.download_button("📥 Baixar Word (.docx)", resultado, "texto_convertido.docx")
